@@ -1,0 +1,97 @@
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Queue;
+
+public class MazeSolver {
+    private static final int[][] DIRS = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
+
+    public static List<Point> solve(int[][] maze, Point start, Point end) {
+        Queue<Point> queue = new LinkedList<>();
+        Map<Point, Point> parentMap = new HashMap<>();
+        queue.offer(start);
+        parentMap.put(start, null);
+
+        while (!queue.isEmpty()) {
+            Point curr = queue.poll();
+            if (curr.equals(end)) {
+                return buildPath(parentMap, end);
+            }
+            for (int[] dir : DIRS) {
+                int x = curr.x + dir[0];
+                int y = curr.y + dir[1];
+                Point next = new Point(x, y);
+                if (isValidMove(maze, next) && !parentMap.containsKey(next)) {
+                    queue.offer(next);
+                    parentMap.put(next, curr);
+                }
+            }
+        }
+        return null;
+    }
+
+    private static boolean isValidMove(int[][] maze, Point p) {
+        int m = maze.length;
+        int n = maze[0].length;
+        return p.x >= 0 && p.x < m && p.y >= 0 && p.y < n && maze[p.x][p.y] == 0;
+    }
+
+    private static List<Point> buildPath(Map<Point, Point> parentMap, Point end) {
+        List<Point> path = new ArrayList<>();
+        Point curr = end;
+        while (curr != null) {
+            path.add(0, curr);
+            curr = parentMap.get(curr);
+        }
+        return path;
+    }
+
+    public static void main(String[] args) {
+        int[][] maze = {
+            {0, 0, 0, 0, 0},
+            {1, 1, 0, 1, 0},
+            {0, 0, 0, 0, 0},
+            {0, 1, 1, 1, 0},
+            {0, 0, 0, 0, 0}
+        };
+        Point start = new Point(0, 0);
+        Point end = new Point(4, 4);
+        List<Point> path = solve(maze, start, end);
+        if (path == null) {
+            System.out.println("No path found");
+        } else {
+            System.out.println("Path: " + path);
+        }
+    }
+}
+
+class Point {
+    public int x;
+    public int y;
+
+    public Point(int x, int y) {
+        this.x = x;
+        this.y = y;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof Point) {
+            Point other = (Point) obj;
+            return x == other.x && y == other.y;
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(x, y);
+    }
+
+    @Override
+    public String toString() {
+        return "(" + x + ", " + y + ")";
+    }
+}
